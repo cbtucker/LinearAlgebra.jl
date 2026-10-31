@@ -373,9 +373,8 @@ function svd(A::SymTridiagonal{<:Real};
              full::Bool = false,
              alg::Algorithm = default_svd_alg(A),
              atol::Real = 0, rtol::Real = 0)
-    isempty(A) && return _empty_svd(eigtype(eltype(A)))
-    F = eigen(A)
-    return _svd_from_eigen!(F.values, F.vectors)      # ← two args
+    T = eigtype(eltype(A))
+    return svd!(copymutable_oftype(A, T); full, alg, atol, rtol)
 end
 
 function svd!(A::SymTridiagonal{<:Real};
@@ -383,8 +382,10 @@ function svd!(A::SymTridiagonal{<:Real};
               alg::Algorithm = default_svd_alg(A),
               atol::Real = 0, rtol::Real = 0)
     isempty(A) && return _empty_svd(eigtype(eltype(A)))
+    T = eigtype(eltype(A))
+    isempty(A) && return SVD(Matrix{T}(undef, 0, 0), T[], Matrix{T}(undef, 0, 0))
     F = eigen!(A)
-    return _svd_from_eigen!(F.values, F.vectors)      # ← two args
+    return _svd_from_eigen!(F.values, F.vectors)
 end
 
 # tril and triu
